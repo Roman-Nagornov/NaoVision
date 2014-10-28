@@ -1,5 +1,5 @@
 import numpy as np
-
+import cv2
 
 def project_2d_to_3d(in_drawing_pnts, in_drawing_size, in_papersheet_vertexes):
     """
@@ -34,8 +34,17 @@ def project_2d_to_3d(in_drawing_pnts, in_drawing_size, in_papersheet_vertexes):
         out_drawing_3d_pnts[ind] = top_x_axis_pnt + (bottom_x_axis_pnt - top_x_axis_pnt) * drawing_pnts[ind, 1]
     return out_drawing_3d_pnts
 
-def sheet_crds_to_cmr_crds():
-    pass
+def sheet_crds_to_cmr_crds(rvec, tvec, dots_list_sheet_cs):
+    rmtx, jacobian = cv2.Rodrigues(rvec)
+    dots_list_cmr_cs = np.zeros((len(dots_list_sheet_cs), 3))
+    print 'dls = ', tvec.T
+    print 'rmtx = ', rmtx
+    print 'vertexes = ', dots_list_sheet_cs
+    dots_list_cmr_cs = np.dot(rmtx, dots_list_sheet_cs.T) + tvec
+    #for ind in xrange(dots_list_sheet_cs.shape[0]):
+    #    dots_list_cmr_cs[ind] = (np.dot(rmtx, dots_list_sheet_cs[ind].T) + tvec.T[0])
+    print dots_list_cmr_cs
+    return dots_list_cmr_cs.T
 
 if __name__ == "__main__":
     import ShowProjection as sp
