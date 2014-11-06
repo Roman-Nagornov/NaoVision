@@ -184,7 +184,7 @@ def plot_projected_img(src_img, background_img, output_crds):
     return rst_img
 
 
-def draw_on_found_paper_sheet(drawing):
+def draw_on_found_paper_sheet(drawing, img_client):
     """
         The main function.
         Input:
@@ -193,11 +193,12 @@ def draw_on_found_paper_sheet(drawing):
 
     # Initialize video client
     cv2.namedWindow("find_paper_sheet")
-    vc = cv2.VideoCapture(0)
+    # vc = cv2.VideoCapture(0)
 
     # Try to get the first frame
-    if vc.isOpened():
-        rval, tmp_frame = vc.read()
+    if img_client.isOpened():
+        rval, tmp_frame = img_client.getPic()
+        print 'get_first'
         # Undistort frame
         frame = cv2.undistort(tmp_frame, cam_intr_mtx, cam_dist, None, newcameramtx)
     else:
@@ -243,7 +244,7 @@ def draw_on_found_paper_sheet(drawing):
 
             cv2.imshow("find_paper_sheet", frame)
 
-        rval, tmp_frame = vc.read()
+        rval, tmp_frame = img_client.getPic()
         # Undistort frame
         frame = cv2.undistort(tmp_frame, cam_intr_mtx, cam_dist, None, newcameramtx)
 
@@ -256,8 +257,14 @@ def draw_on_found_paper_sheet(drawing):
 
 
 def main():
+    PORT = 9559
+    IP = "192.168.1.33"
     drawing = cv2.imread('test.png')
-    draw_on_found_paper_sheet(drawing)
+
+    import retrieve_bottom_cmr_frame as ret_img
+    img_client = ret_img.NAOcam(IP, PORT)
+    print img_client.getPic(), 'get_img'
+    draw_on_found_paper_sheet(drawing, img_client)
     pass
 
 if __name__ == "__main__":
