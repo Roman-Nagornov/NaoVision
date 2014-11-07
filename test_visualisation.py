@@ -10,10 +10,22 @@ DISTORT_TRESHOLD = 5
 
 
 def show_cs(rmtx, tvec, ax):
+    """
+        Visualise a coordinate system in default coordinate system.
+        Input:
+            rmtx - (3x3 numpy array) - rotation matrix.
+            tvec - (1x3 numpy array) - translation vector.
+            ax - matplotlib axis in which coordinate system must be visualised.
+        Output:
+            minmax_list - [[minx, miny, minz], [maxx, maxy, maxz] list] needed to workaround matplotlib bug.
+    """
+    # Scale factor for axis.
     scale = 0.1
+    # Colors for XYZ
     colors = ['r', 'g', 'b']
     #rmtx, jacobian = cv2.Rodrigues(rvec)
     rmtx = np.array(rmtx)
+    # Plot each axis.
     for ind in xrange(3):
         ax.plot([tvec[0], tvec[0] + scale * rmtx[ind, 0]],
                 [tvec[1], tvec[1] + scale * rmtx[ind, 1]],
@@ -24,49 +36,50 @@ def show_cs(rmtx, tvec, ax):
     return minmax_list
 
 
-def calculate_real_coordinates_of_paper_sheet(main_point, rotation_vector):
-    """
-    Translate paper coordinates to camera coordinate system
-    Input:
-    main_point - numpy 3D array coordinates of top left point
-    rotation_vector - rotation of the paper sheet relative to camera coordinate system
-    Output:
-    paper_sheet_real_crds - numpy 3D array of all paper coordinates
-    """
-    paper_sheet_real_crds = np.array([[main_point[0], main_point[1], main_point[2]],
-                                    [main_point[0], main_point[1], main_point[2]],
-                                    [main_point[0], main_point[1], main_point[2]],
-                                    [main_point[0], main_point[1], main_point[2]]], np.float32)
-    #Calculate rotation matrix from rotation vector
-    rotation_matrix = cv2.Rodrigues(rotation_vector)
-    #Calculate real paper sheet coordinates relative to camera
-    paper_sheet_real_crds = paper_sheet_real_crds + paper_vertexes
-    #Get the transformation of the paper coordinates
-    paper_sheet_real_crds = np.dot(paper_sheet_real_crds, rotation_matrix)
-
-    return paper_sheet_real_crds
+# def calculate_real_coordinates_of_paper_sheet(main_point, rotation_vector):
+#     """
+#     Translate paper coordinates to camera coordinate system
+#     Input:
+#     main_point - numpy 3D array coordinates of top left point
+#     rotation_vector - rotation of the paper sheet relative to camera coordinate system
+#     Output:
+#     paper_sheet_real_crds - numpy 3D array of all paper coordinates
+#     """
+#     paper_sheet_real_crds = np.array([[main_point[0], main_point[1], main_point[2]],
+#                                     [main_point[0], main_point[1], main_point[2]],
+#                                     [main_point[0], main_point[1], main_point[2]],
+#                                     [main_point[0], main_point[1], main_point[2]]], np.float32)
+#     #Calculate rotation matrix from rotation vector
+#     rotation_matrix = cv2.Rodrigues(rotation_vector)
+#     #Calculate real paper sheet coordinates relative to camera
+#     paper_sheet_real_crds = paper_sheet_real_crds + paper_vertexes
+#     #Get the transformation of the paper coordinates
+#     paper_sheet_real_crds = np.dot(paper_sheet_real_crds, rotation_matrix)
+#
+#     return paper_sheet_real_crds
 
 def test_visualise(img_client):
-
+    """
+        Function for test visualisation.
+    :param img_client:
+    :return:
+    """
     # Initialize video client
     cv2.namedWindow("find_paper_sheet")
     # Try to get the first frame
     if img_client.isOpened():
         rval, tmp_frame = img_client.getPic()
-        # Undistort frame
     else:
         rval = False
 
+    # If we've got a new frame
     if rval:
-
-        is_detected = False
-
         frame_num = 0
         while frame_num < DISTORT_TRESHOLD:
+            # Undistort frame
             frame = cv2.undistort(tmp_frame, sp.cam_intr_mtx, sp.cam_dist, None, sp.newcameramtx)
             is_detected, paper_vertexes, cmr_rvec, cmr_tvec = sp.detect_paper_sheet(frame)
             rval, tmp_frame = img_client.getPic()
-            # Undistort frame
 
             if is_detected:
                 frame_num += 1
@@ -76,14 +89,10 @@ def test_visualise(img_client):
                 break
         cv2.destroyWindow("find_paper_sheet")
 
-        # minmax_x = list()
-        # minmax_y = list()
-        # minmax_z = list()
         coub_axis = [[], [], []]
         vertexes_cmr_cs, minmax_list = pr2t3.sheet_crds_to_cmr_crds(cmr_rvec, cmr_tvec, sp.paper_sheet_vertexes)
         for ind in xrange(3):
             coub_axis[ind] += [minmax_list[0][ind], minmax_list[1][ind]]
-        #print coub_axis
 
         cmr_rmtx, jacobian = cv2.Rodrigues(cmr_rvec)
 
@@ -112,24 +121,7 @@ def test_visualise(img_client):
             contour_3d_cmr_cs = contour_3d_cmr_cs.T
             ax.plot(contour_3d_cmr_cs[0], contour_3d_cmr_cs[1], contour_3d_cmr_cs[2], c='0.5', marker='.', alpha=0.5)
 
-            #contours_list_3d_model_cs.append(pr2t3.convert_drawing_pnts_2d_3d(np.array(contour)))
-
-            #contours_list_3d_cmr_cs = list()
-            #for contour in contours_list_3d_model_cs:
-            #pnts_cmr_cs, minmax_list = pr2t3.sheet_crds_to_cmr_crds(cmr_rvec, cmr_tvec, contour)
-            #contours_list_3d_cmr_cs.append(pnts_cmr_cs)
-
-
-            # Magic workaround for the Matplolib bug.
-            # coub_axis = list()
-            #for ind in xrange(3):
-            # coub_axis.append(np.array(map(lambda x: x[:, ind].max(), chain_position_list)
-            #     + map(lambda x: x[:, ind].min(), chain_position_list)
-            #     + map(lambda x: x[ind].max(), target_end_effector_pos)
-            #     + map(lambda x: x[ind].max(), target_end_effector_pos)))
-        # + [target_end_effector_pos[ind]])
-        # Create cubic bounding box to simulate equal aspect ratio
-        # max_range = np.array([coub_axis[0].max() - coub_axis[0].min(), coub_axis[1].max() - coub_axis[1].min(), coub_axis[2].max() - coub_axis[2].min()]).max()
+        # Magic workaround for matplotlib aspect ratio bug.
         coub_axis = np.array(coub_axis)
         max_range = np.array(map(lambda axis: axis.max() - axis.min(), coub_axis)).max()
         grid_list = list()
