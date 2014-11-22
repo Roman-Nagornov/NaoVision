@@ -19,8 +19,8 @@ camera_info_dir = 'camera_info/'
 # coordinate system.
 paper_sheet_vertexes = np.array([[0., 0., 0.],
                                 [0.1485, 0., 0.],
-                                [0.1485, 0.21, 0.],
-                                [0., 0.21, 0.]], np.float32)
+                                [0.1485, 0.105, 0.],
+                                [0., 0.105, 0.]], np.float32)
 
 # The stopping criteria of cornerSubPix() method.
 cornerSubPix_criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -258,7 +258,7 @@ def draw_on_found_paper_sheet(drawing, img_client):
 
 def main():
     PORT = 9559
-    IP = "192.168.1.33"
+    IP = "192.168.1.35"
     drawing = cv2.imread('test.png')
 
     import retrieve_bottom_cmr_frame as ret_img

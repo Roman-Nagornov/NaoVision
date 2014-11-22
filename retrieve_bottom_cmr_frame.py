@@ -16,12 +16,19 @@ class NAOcam:
     """
     videoClient = None
     camProxy = None
+    is_opened = False
 
     def __init__(self, IP, PORT):
         """
         initialize videoClient and camProxy
         """
-        self.camProxy = ALProxy("ALVideoDevice", IP, PORT)
+        try:
+            self.camProxy = ALProxy("ALVideoDevice", IP, PORT)
+            self.is_opened = True
+        except RuntimeError, e:
+            print "Error while creating ALVideoDevice proxy: ", e
+            exit(1)
+
         resolution = 2        # VGA
         colorSpace = 11     # RGB
         cameraID = 1        # Lower camera
@@ -32,7 +39,7 @@ class NAOcam:
 
     def isOpened(self):
         # Make checking is image retrieved
-        return True
+        return self.is_opened
 
     def getPic(self):
         """
@@ -42,7 +49,7 @@ class NAOcam:
         imageWidth = naoImage[0]
         imageHeight = naoImage[1]
         array = naoImage[6]
-        img = np.array(Image.fromstring("RGB", (imageWidth, imageHeight), array))
+        img = np.array(Image.frombytes("RGB", (imageWidth, imageHeight), array)) # from string
         # Make checking is image retrieved
         return True, img
 
@@ -73,7 +80,7 @@ class NAOcam:
 
 
 if __name__ == '__main__':
-    IP = "192.168.1.43"    # Replace here with your NaoQi's IP address.
+    IP = "192.168.1.35"    # Replace here with your NaoQi's IP address.
     PORT = 9559
 
     naoCam = NAOcam(IP, PORT)

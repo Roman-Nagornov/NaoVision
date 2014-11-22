@@ -6,7 +6,7 @@ import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 
 
-DISTORT_TRESHOLD = 5
+DISTORT_TRESHOLD = 2
 
 
 def show_cs(rmtx, tvec, ax):
@@ -81,8 +81,7 @@ def test_visualise(img_client):
             is_detected, paper_vertexes, cmr_rvec, cmr_tvec = sp.detect_paper_sheet(frame)
             rval, tmp_frame = img_client.getPic()
 
-            if is_detected:
-                frame_num += 1
+            frame_num += 1
             # Exit on 'q'
             cv2.imshow("find_paper_sheet", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -141,7 +140,7 @@ def test_visualise(img_client):
 if __name__ == "__main__":
     #vc = cv2.VideoCapture(0)
     PORT = 9559
-    IP = "192.168.1.33"
+    IP = "192.168.1.35"
     import retrieve_bottom_cmr_frame as ret_img
     img_client = ret_img.NAOcam(IP, PORT)
     test_visualise(img_client)
