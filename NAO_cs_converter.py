@@ -49,7 +49,7 @@ class CSconverter:
         return rmtx, tvec
 
     pass
-
+"""
 class NAOvisCS(CSconverter):
     motionProxy = None
     camMtxRelHeadRMtx = None
@@ -61,9 +61,9 @@ class NAOvisCS(CSconverter):
 
 
     def __init__(self, IP, PORT, _CSpace=1):
-        """
 
-        """
+
+
         self.CSpace = _CSpace
         camYaw = 1.2 * math.pi / 180.
         XcamTrans, YcamTrans, ZcamTrans = 0.05871, 0., 0.06364    # in meters
@@ -94,9 +94,9 @@ class NAOvisCS(CSconverter):
         pass
 
     def cam2CSpace(self, vect):
-        """
-        vect.shape = (3, 1)
-        """
+        ""
+        #vect.shape = (3, 1)
+        ""
         if self.HeadRMtxRelWMtx == None:
             self.getNAOvisCSdata()
         hvect = np.append(vect, [[1.]], axis=0)
@@ -116,7 +116,7 @@ class NAOvisCS(CSconverter):
         pass
 
     pass
-
+"""
 
 class bottom_cmr_converter(CSconverter):
 
@@ -191,6 +191,7 @@ class bottom_cmr_converter(CSconverter):
 
     def loadNAO_VisCoordData(self):
         pass
+
 
     pass
 

@@ -27,12 +27,12 @@ def show_cs(rmtx, tvec, ax):
     rmtx = np.array(rmtx)
     # Plot each axis.
     for ind in xrange(3):
-        ax.plot([tvec[0], tvec[0] + scale * rmtx[ind, 0]],
-                [tvec[1], tvec[1] + scale * rmtx[ind, 1]],
-                [tvec[2], tvec[2] + scale * rmtx[ind, 2]], c=colors[ind])
-    minmax_list = [[tvec[0], tvec[1], tvec[2]], [tvec[0] + scale * rmtx[ind, 0],
-                  tvec[1] + scale * rmtx[ind, 1],
-                  tvec[2] + scale * rmtx[ind, 2]]]
+        ax.plot([tvec[0], tvec[0] + scale * rmtx[0, ind]],
+                [tvec[1], tvec[1] + scale * rmtx[1, ind]],
+                [tvec[2], tvec[2] + scale * rmtx[2, ind]], c=colors[ind])
+    minmax_list = [[tvec[0], tvec[1], tvec[2]], [tvec[0] + scale * rmtx[0, ind],
+                  tvec[1] + scale * rmtx[1, ind],
+                  tvec[2] + scale * rmtx[2, ind]]]
     return minmax_list
 
 

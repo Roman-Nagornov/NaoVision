@@ -2,7 +2,7 @@
     The module that controls all aspects of drawing experiments:
     - preparing for drawing
     - drawing
-    - end of experiment
+    - finish the experiment
 """
 sys.path.append('./naoqi/')
 from naoqi import ALProxy

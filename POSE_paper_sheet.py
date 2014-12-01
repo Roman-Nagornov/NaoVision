@@ -2,7 +2,7 @@ import cv2
 import ShowProjection as sp
 import numpy as np
 import NAO_cs_converter as cs_conv
-
+import project_2d_to_3d as pr2t3
 import pylab as plt
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
@@ -51,10 +51,16 @@ def get_paper_sheet_POSE(img_client):
     return is_detected, paper_vertexes, cmr_rvec, cmr_tvec
 
 
+def invR(transform_mtx):
+    tmp = transform_mtx.copy()
+    tmp[:3, :3] = tmp[:3, :3].T
+    return tmp
+
+
 if __name__ == "__main__":
     #vc = cv2.VideoCapture(0)
     PORT = 9559
-    IP = "192.168.1.35"
+    IP = "192.168.1.33"
     import retrieve_bottom_cmr_frame as ret_img
     img_client = ret_img.NAOcam(IP, PORT)
     is_detected, paper_vertexes, cmr_rvec, cmr_tvec = get_paper_sheet_POSE(img_client)
@@ -67,7 +73,7 @@ if __name__ == "__main__":
 
     # Convert paper sheet coordinates from cmr coordinate system to robot coordinate system
     NAO_CS = cs_conv.bottom_cmr_converter(IP, PORT)
-    world_frame2body_rmtx, world_frame2body_tvec = NAO_CS.get_world_frame2img_cs_transform(cmr_rmtx.T, cmr_tvec)
+    world_frame2body_rmtx, world_frame2body_tvec = NAO_CS.get_world_frame2img_cs_transform(cmr_rmtx, cmr_tvec)
     #####################################################
     # Visualisation
     #######################################################
@@ -86,26 +92,27 @@ if __name__ == "__main__":
         coub_axis[ind] += [minmax_list[0][ind], minmax_list[1][ind]]
 
 
-    """
-    minmax_list = tv.show_cs(world_frame2body_rmtx, np.array(world_frame2body_tvec).T[0], ax)
+    world_frame2body_rvec, jacobian = cv2.Rodrigues(world_frame2body_rmtx)
+    vertexes_cmr_cs, minmax_list = pr2t3.sheet_crds_to_cmr_crds(np.array(world_frame2body_rvec), np.array(world_frame2body_tvec), sp.paper_sheet_vertexes)
     for ind in xrange(3):
         coub_axis[ind] += [minmax_list[0][ind], minmax_list[1][ind]]
-    """
+    ax.plot(vertexes_cmr_cs[0], vertexes_cmr_cs[1], vertexes_cmr_cs[2], c='0.5', marker='.', alpha=0.5)
+
+
     nao_mtxs_list = NAO_CS.getMtxDict()
-    tmp_transform = nao_mtxs_list['world_frame2head_transform']
-    tmp_transform[:3, :3] = tmp_transform[:3, :3].T
-    mtxs_list_world_frame = [tmp_transform]
-    """,
-
-
-                             nao_mtxs_list['world_frame2head_transform'] * nao_mtxs_list['head2bottom_cmr_transform'],
-                             nao_mtxs_list['world_frame2head_transform'] * nao_mtxs_list['head2bottom_cmr_transform'] * nao_mtxs_list['bottom_cmr2img_cs_transform']]
-                            """
+    mtxs_list_world_frame = [nao_mtxs_list['world_frame2head_transform'],
+                            nao_mtxs_list['world_frame2head_transform'] * nao_mtxs_list['head2bottom_cmr_transform'],
+                            nao_mtxs_list['world_frame2head_transform'] * nao_mtxs_list['head2bottom_cmr_transform'] * nao_mtxs_list['bottom_cmr2img_cs_transform']]
     for transform in mtxs_list_world_frame:
         rmtx_tmp, tvec_tmp = NAO_CS.transform2rmtx_tvec(transform)
         minmax_list = tv.show_cs(rmtx_tmp, tvec_tmp, ax)
         for ind in xrange(3):
             coub_axis[ind] += [minmax_list[0][ind], minmax_list[1][ind]]
+
+
+
+
+
     import test_contours as tc
     #contours_list_3d_model_cs = list()
     # for contour in tc.test_contour:
