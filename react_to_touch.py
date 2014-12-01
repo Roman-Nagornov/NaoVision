@@ -35,6 +35,11 @@ class ReactToTouch(ALModule):
             "ReactToTouch",
             "onTouched")
 
+        # Initialize bahaviours
+        #self.behaviours = _behaviours
+        # if len(self.behaviours) != 3:
+
+
     def onTouched(self, strVarName, value):
         """ This will be called each time a touch
         is detected.
@@ -50,7 +55,18 @@ class ReactToTouch(ALModule):
             if p[1]:
                 touched_bodies.append(p[0])
 
-        self.say(touched_bodies)
+        global is_skip_touched
+        print touched_bodies
+        if len(touched_bodies) > 1:
+            if touched_bodies[-1] == 'Head/Touch/Front':
+                print 0
+            elif touched_bodies[-1] == 'Head/Touch/Middle':
+                print 1
+            elif touched_bodies[-1] == 'Head/Touch/Rear':
+                print 2
+                is_skip_touched = True
+
+        # self.say(touched_bodies)
 
         # Subscribe again to the event
         memory.subscribeToEvent("TouchChanged",
